@@ -6,10 +6,8 @@ val play_2_5 = "2.5.10"
 val play_2_7 = "2.7.0-M1"
 
 def commonProject(id: String, path: String): Project = {
-  val t =project.copy(id = id)
-  t
+  Project(id, file(path))
 }
-val projectPath = "shared"
 def playProject(includePlayJsonVersion: String): Project = {
   val suffix = includePlayJsonVersion match {
     case `play_2_3` => "23"
@@ -17,8 +15,12 @@ def playProject(includePlayJsonVersion: String): Project = {
     case `play_2_7` => "27"
   }
   val projectId = s"play$suffix"
-  val projectPath = "shared"
-  commonProject(projectId, projectId)
+  val path = includePlayJsonVersion match {
+    case `play_2_3` => "./shared"
+    case `play_2_5` => "./play25"
+    case `play_2_7` => "./play27"
+  }
+  commonProject(projectId, path)
 
 
 }
@@ -36,6 +38,7 @@ lazy val play23 = playProject(play_2_3)
   )
 
 lazy val play25 = playProject(play_2_5)
+  .in(file("./play25"))
   .configs(IntegrationTest.extend(Test))
   .settings(Defaults.itSettings: _* )
   .settings(
